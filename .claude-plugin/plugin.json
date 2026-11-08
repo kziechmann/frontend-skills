@@ -1,0 +1,12 @@
+{
+  "$schema": "https://anthropic.com/claude-code/plugin.schema.json",
+  "name": "frontend-skills",
+  "version": "0.1.0",
+  "description": "Front-end audit skills with evals: Lighthouse performance, axe-core accessibility, CSS quality, and visual layout/usability — each runs open-source tooling, suggests or applies fixes, re-measures, and writes a report.",
+  "author": {
+    "name": "kziechmann"
+  },
+  "license": "MIT",
+  "keywords": ["frontend", "performance", "lighthouse", "accessibility", "axe", "wcag", "css", "stylelint", "layout", "usability", "evals"],
+  "skills": ["./skills/"]
+}

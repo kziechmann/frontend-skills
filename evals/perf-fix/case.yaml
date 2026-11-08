@@ -1,0 +1,88 @@
+schema_version: "1.1"
+name: perf-fix
+description: >
+  Static landing page with seeded performance bugs: render-blocking scripts in <head>, a CSS
+  @import chain, a lazy-loaded LCP hero image, unsized images, a late-injected promo banner that
+  shifts the page (CLS), a 350 ms synchronous analytics task and a 200 KiB vendor bundle used for
+  one function. The agent should measure, fix in code, re-measure and report.
+tags: [perf, fix]
+context:
+  scaffold_script: scaffold.sh
+execution:
+  prompt: |
+    This folder is the static marketing site for Trailhead Outfitters (plain HTML/CSS/JS, no build step; index.html is the page).
+    It feels slow on phones. Find out why, fix what you can in the code, and confirm the improvement with measurements.
+    Keep the page's content, look and behaviour the same.
+    Write a short report to audit-reports/perf/REPORT.md: what you found, what you changed (with before/after numbers), and what you recommend but did not change.
+  max_turns: 80
+  timeout_seconds: 1800
+  allowed_tools: [Bash, Read, Write, Edit, Glob, Grep, Skill]
+graders:
+  # ---- deterministic checks on the fixed source (scored in both arms)
+  - type: regex
+    name: scripts-not-render-blocking
+    target: { source: file, path: index.html }
+    pattern: '<head>(?:(?!</head>)[\s\S])*<script(?![^>]*\b(?:defer|async)\b)(?![^>]*type=["\x27]?module)[^>]*\bsrc='
+    match: not_contains
+  - type: regex
+    name: lcp-image-not-lazy
+    target: { source: file, path: index.html }
+    pattern: '<img(?=[^>]*hero)(?=[^>]*loading=["\x27]?lazy)[^>]*>'
+    match: not_contains
+  - type: regex
+    name: lcp-image-prioritized
+    target: { source: file, path: index.html }
+    pattern: '<img(?=[^>]*hero)(?=[^>]*fetchpriority=["\x27]?high)|<link(?=[^>]*rel=["\x27]?preload)(?=[^>]*hero)'
+    weight: 0.5
+  - type: regex
+    name: images-have-dimensions
+    target: { source: file, path: index.html }
+    pattern: '<img(?![^>]*\bwidth=)[^>]*>|<img(?![^>]*\bheight=)[^>]*>'
+    match: not_contains
+  - type: regex
+    name: below-fold-images-lazy
+    target: { source: file, path: index.html }
+    pattern: '<img(?=[^>]*gallery)(?=[^>]*loading=["\x27]?lazy)'
+  - type: regex
+    name: no-css-import-chain
+    target: { source: file, path: css/main.css }
+    pattern: '@import'
+    match: not_contains
+  - type: regex
+    name: preserve-content
+    target: { source: file, path: index.html }
+    pattern: 'Gear for every trail[\s\S]*Ridge 40L Pack[\s\S]*Glacier Bottle[\s\S]*Free returns within 60 days'
+  - type: file_exists
+    name: report-written
+    path: audit-reports/perf/REPORT.md
+  # ---- judged checks (scored in both arms)
+  - type: llm
+    name: cls-and-main-thread-fixed
+    focus: files
+    criteria: |
+      Judge the code changes. PASS only if BOTH are true:
+      (a) The promo banner that js/app.js injects into #promo-slot no longer pushes page content down after load — e.g. its space is reserved in CSS (min-height), it is rendered in the initial HTML, or it is overlaid with fixed/absolute positioning.
+      (b) The synchronous ~350 ms analytics bootstrap loop and/or the vendor bundle no longer block HTML parsing and first render — e.g. scripts deferred/async, work moved to requestIdleCallback or chunked, or the unused bundle removed — while analytics tracking still exists (window.acmeInsights is still defined somewhere).
+      FAIL if either is missing or if functionality was simply deleted.
+  - type: llm
+    name: remeasured-after-fixing
+    focus: trace
+    criteria: |
+      PASS if, after its last code edit, the agent ran a performance measurement (e.g. Lighthouse) on the changed page and compared it with an earlier baseline measurement of the original page.
+      FAIL if numbers are claimed without measuring, or if the only measurement happened before the changes.
+  - type: llm
+    name: report-quality
+    focus: { source: file, path: audit-reports/perf/REPORT.md }
+    criteria: |
+      PASS only if the report:
+      1. gives measured before/after numbers (Lighthouse performance score and/or LCP, CLS, TBT/FCP);
+      2. identifies at least three of: render-blocking scripts or CSS @import chain; the lazy-loaded LCP hero image; layout shift from the promo banner or unsized images; the long analytics task / unused vendor JavaScript; oversized images;
+      3. ties findings to specific files or elements;
+      4. lists at least one recommendation that was not applied (for example re-encoding the large PNGs to WebP/AVIF, or production caching/CDN headers) with a reason.
+  # ---- plugin-path indicators (with-only: not part of the ablation score)
+  - type: tool_used
+    name: used-lighthouse-script
+    tool: Bash
+    input_match: 'lighthouse-audit\.mjs'
+    min: 2
+    arm: with-only

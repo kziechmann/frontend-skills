@@ -1,0 +1,48 @@
+schema_version: "1.1"
+name: perf-report-only
+description: >
+  Same seeded landing page, but the user only wants suggestions. The agent must measure and write a
+  prioritized, evidence-backed report without modifying the site.
+tags: [perf, report]
+context:
+  scaffold_script: scaffold.sh
+execution:
+  prompt: |
+    Can you review the loading performance of this static landing page (index.html, no build step) and tell me what to optimize?
+    Don't modify the site's files yet — I want to review the suggestions with my team first.
+    Put your prioritized recommendations, with the evidence for each, in audit-reports/perf/REPORT.md.
+  max_turns: 50
+  timeout_seconds: 1200
+  allowed_tools: [Bash, Read, Write, Edit, Glob, Grep, Skill]
+graders:
+  - type: tool_used
+    name: no-edits
+    tool: Edit
+    min: 0
+    max: 0
+  - type: regex
+    name: preserve-site-unchanged
+    target: { source: file, path: index.html }
+    pattern: '<script src="js/vendor-bundle\.js"></script>[\s\S]*class="hero-image" src="img/hero\.png" alt="Hikers on a ridge at sunrise" loading="lazy">'
+  - type: regex
+    name: preserve-css-unchanged
+    target: { source: file, path: css/main.css }
+    pattern: '^@import url\("typography\.css"\);'
+  - type: file_exists
+    name: report-written
+    path: audit-reports/perf/REPORT.md
+  - type: llm
+    name: report-is-actionable
+    focus: { source: file, path: audit-reports/perf/REPORT.md }
+    criteria: |
+      PASS only if the report:
+      1. includes measured numbers (Lighthouse score and/or LCP, CLS, TBT, FCP) from an actual run;
+      2. orders recommendations by expected impact;
+      3. covers at least four of: lazy-loaded LCP hero image (remove loading=lazy / add fetchpriority); render-blocking scripts in <head> (defer/async); CSS @import chain; unsized images or the promo banner causing layout shift; the synchronous analytics task / unused vendor bundle; oversized PNG images (resize / modern formats); unused legacy CSS framework;
+      4. names the file or element each recommendation applies to and the concrete change to make.
+      FAIL if it is generic advice not tied to this page.
+  - type: tool_used
+    name: used-lighthouse-script
+    tool: Bash
+    input_match: 'lighthouse-audit\.mjs'
+    arm: with-only

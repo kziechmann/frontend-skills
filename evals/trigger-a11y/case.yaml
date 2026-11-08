@@ -1,0 +1,17 @@
+schema_version: "1.1"
+name: trigger-a11y
+description: Skill selection — a natural request that should load the a11y-audit skill without naming it.
+tags: [trigger, a11y]
+context:
+  scaffold_script: scaffold.sh
+execution:
+  prompt: |
+    A customer who navigates with a keyboard and a screen reader says they can't use the signup form on our page (index.html here). Can you check what's wrong?
+  max_turns: 6
+  timeout_seconds: 400
+  allowed_tools: [Bash, Read, Glob, Grep, Skill]
+graders:
+  - type: tool_used
+    name: loads-a11y-audit
+    tool: Skill
+    input_match: 'a11y-audit'

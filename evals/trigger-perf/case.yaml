@@ -1,0 +1,17 @@
+schema_version: "1.1"
+name: trigger-perf
+description: Skill selection — a natural request that should load the perf-audit skill without naming it.
+tags: [trigger, perf]
+context:
+  scaffold_script: scaffold.sh
+execution:
+  prompt: |
+    Lighthouse gives this landing page (index.html in this folder) a terrible mobile score. What's making it slow?
+  max_turns: 6
+  timeout_seconds: 400
+  allowed_tools: [Bash, Read, Glob, Grep, Skill]
+graders:
+  - type: tool_used
+    name: loads-perf-audit
+    tool: Skill
+    input_match: 'perf-audit'

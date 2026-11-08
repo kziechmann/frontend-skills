@@ -1,0 +1,99 @@
+schema_version: "1.1"
+name: css-refactor
+description: >
+  Dashboard stylesheet with seeded problems: ID and over-qualified selectors, !important,
+  duplicate/invalid declarations (typo'd property, invalid hex), vendor prefixes, float/clearfix
+  layout, transition: all, a width-animating keyframe, removed focus outlines, no reduced-motion
+  handling, near-duplicate hard-coded colors, an @import chain. The agent should refactor to modern
+  practice without unintended visual changes, and verify that.
+tags: [css, fix]
+context:
+  scaffold_script: scaffold.sh
+execution:
+  prompt: |
+    css/styles.css for this dashboard (static site; index.html is the page) has grown messy and the team wants it cleaned up to modern CSS best practices before adding features.
+    Refactor the CSS — you may adjust class names in the HTML if needed — without changing how the page looks, except where the current CSS is genuinely broken.
+    Write a report to audit-reports/css/REPORT.md with the problems you found, what you changed, and how you checked the page still looks the same.
+  max_turns: 80
+  timeout_seconds: 1800
+  allowed_tools: [Bash, Read, Write, Edit, Glob, Grep, Skill]
+graders:
+  - type: regex
+    name: invalid-css-fixed
+    target: { source: file, path: css/styles.css }
+    pattern: '\bcolr\s*:|#ggg\b'
+    match: not_contains
+  - type: regex
+    name: no-id-selectors
+    target: { source: file, path: css/styles.css }
+    flags: m
+    pattern: '^[^{}@/]*#[a-zA-Z][\w-]*[^{};]*\{'
+    match: not_contains
+  - type: regex
+    name: no-obsolete-vendor-prefixes
+    target: { source: file, path: css/styles.css }
+    pattern: '-(?:webkit|moz)-(?:border-radius|box-shadow|box-sizing)'
+    match: not_contains
+  - type: regex
+    name: no-float-layout
+    target: { source: file, path: css/styles.css }
+    pattern: 'float:\s*(?:left|right)|clear:\s*both'
+    match: not_contains
+  - type: regex
+    name: no-transition-all
+    target: { source: file, path: css/styles.css }
+    pattern: 'transition:\s*all\b'
+    match: not_contains
+  - type: regex
+    name: no-layout-property-animation
+    target: { source: file, path: css/styles.css }
+    pattern: '@keyframes[^{]*\{(?:[^{}]|\{[^{}]*\})*?\{[^{}]*\b(?:width|height|left|top|margin)\s*:[^{}]*\}'
+    match: not_contains
+  - type: regex
+    name: no-stray-important
+    target: { source: file, path: css/styles.css }
+    flags: m
+    pattern: '^(?![^\n]*(?:animation|transition|scroll-behavior)[^\n]*!important)[^\n]*!important'
+    match: not_contains
+  - type: regex
+    name: focus-indicator-restored
+    target: { source: file, path: css/styles.css }
+    pattern: ':focus-visible|^(?![\s\S]*outline:\s*(?:none|0)\b)'
+  - type: regex
+    name: reduced-motion-supported
+    target: { source: file, path: css/styles.css }
+    pattern: 'prefers-reduced-motion'
+  - type: regex
+    name: design-tokens-introduced
+    target: { source: file, path: css/styles.css }
+    pattern: '^(?=[\s\S]*--[\w-]+\s*:\s*#[0-9a-fA-F]{3,8})(?=[\s\S]*var\(--)'
+  - type: regex
+    name: preserve-markup-and-content
+    target: { source: file, path: index.html }
+    pattern: 'class="[^"]*\bcard\b[\s\S]*12,480[\s\S]*Download CSV'
+  - type: file_exists
+    name: report-written
+    path: audit-reports/css/REPORT.md
+  - type: llm
+    name: visual-parity-verified
+    focus: trace
+    criteria: |
+      PASS if the agent checked rendering before and after the refactor (for example screenshots or a pixel diff of the page captured before any CSS change and again after) and reviewed any differences.
+      FAIL if the agent only reasoned about the CSS without rendering it, or only captured screenshots after the changes.
+  - type: llm
+    name: report-quality
+    focus: { source: file, path: audit-reports/css/REPORT.md }
+    criteria: |
+      PASS only if the report: lists concrete problems found (e.g. ID selectors/specificity, !important, invalid or typo'd declarations, vendor prefixes, float layout, missing focus styles or reduced-motion support, duplicated colors);
+      describes the changes made; explains how visual parity was checked; and explicitly calls out intentional visual changes caused by fixing broken CSS (for example the typo'd "colr" on the page title, or the missing generic font family) or states that there were none.
+  - type: tool_used
+    name: used-visual-diff
+    tool: Bash
+    input_match: 'visual-diff\.mjs'
+    min: 2
+    arm: with-only
+  - type: tool_used
+    name: used-css-audit
+    tool: Bash
+    input_match: 'css-audit\.mjs'
+    arm: with-only

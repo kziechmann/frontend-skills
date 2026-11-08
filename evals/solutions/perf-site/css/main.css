@@ -1,0 +1,24 @@
+* { box-sizing: border-box; }
+body { margin: 0; background: #faf8f4; color: #23302b; }
+
+/* Reserve the promo banner's space up front so its late arrival does not shift the page. */
+.promo-slot { min-height: 5.25rem; }
+@media (min-width: 640px) { .promo-slot { min-height: 3.25rem; } }
+.promo { padding: 14px 16px; background: #2f5d50; color: #fff; text-align: center; font-weight: 600; }
+
+.site-header { display: flex; justify-content: space-between; align-items: center; padding: 16px 24px; }
+.logo { font-weight: 700; color: #23302b; text-decoration: none; }
+.site-nav a { margin-left: 16px; color: #23302b; }
+
+.hero { position: relative; }
+.hero-image { display: block; width: 100%; height: auto; }
+.hero-copy { padding: 24px; max-width: 640px; }
+.btn { display: inline-block; padding: 12px 20px; background: #c4572f; color: #fff; border-radius: 6px; text-decoration: none; }
+
+.gallery, .guides { padding: 24px; }
+.gallery-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 24px; align-items: stretch; }
+.product { margin: 0; background: #fff; border-radius: 8px; overflow: hidden; }
+.gallery-img { display: block; width: 100%; height: auto; }
+.product figcaption { padding: 12px; }
+
+.site-footer { padding: 24px; background: #23302b; color: #f1efe9; }

@@ -1,0 +1,212 @@
+/* Design tokens: every color, radius, shadow and z-index used below. */
+:root {
+  --color-text: #333;
+  --color-text-strong: #222;
+  --color-text-muted: #555;
+  --color-text-subtle: #888;
+  --color-page: #f5f6f8;
+  --color-surface: #fff;
+  --color-border: #c8ccd4;
+  --color-brand: #1d2b4f;
+  --color-brand-hover: #2a3b66;
+  --color-nav-link: #c9d1e6;
+  --color-primary: #0b5fff;
+  --color-success: #1a7f37;
+  --color-danger: #cf222e;
+  --color-focus: #0b5fff;
+
+  --font-sans: Helvetica, Arial, sans-serif;
+  --font-size-xs: 0.6875rem;
+  --font-size-sm: 0.75rem;
+  --font-size-base: 0.875rem;
+  --font-size-md: 1.125rem;
+  --font-size-lg: 1.25rem;
+  --font-size-xl: 1.625rem;
+  --font-size-2xl: 1.75rem;
+
+  --radius-sm: 6px;
+  --radius-md: 8px;
+  --shadow-card: 0 1px 3px rgb(0 0 0 / 12%);
+  --header-height: 56px;
+  --sidebar-width: 200px;
+  --z-header: 10;
+}
+
+body {
+  font-family: var(--font-sans);
+  font-size: var(--font-size-base);
+  color: var(--color-text);
+  background: var(--color-page);
+}
+
+:focus-visible {
+  outline: 2px solid var(--color-focus);
+  outline-offset: 2px;
+}
+
+/* ---------- header ---------- */
+.site-header {
+  position: relative;
+  z-index: var(--z-header);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: var(--header-height);
+  padding: 0 24px;
+  background: var(--color-brand);
+}
+
+.brand {
+  color: var(--color-surface);
+  font-size: var(--font-size-lg);
+  font-weight: bold;
+}
+
+.main-nav {
+  display: flex;
+}
+
+.main-nav a {
+  display: block;
+  padding: 0 14px;
+  color: var(--color-nav-link);
+  line-height: var(--header-height);
+  text-decoration: none;
+  transition: color 0.3s, background-color 0.3s;
+}
+
+.main-nav a:hover,
+.main-nav .active {
+  color: var(--color-surface);
+  background: var(--color-brand-hover);
+}
+
+/* ---------- layout ---------- */
+.layout {
+  display: flex;
+  align-items: flex-start;
+}
+
+.sidebar {
+  flex: 0 0 var(--sidebar-width);
+  padding: 24px;
+  box-sizing: border-box;
+}
+
+.sidebar h3 {
+  margin-bottom: 12px;
+  color: var(--color-text-subtle);
+  font-size: var(--font-size-xs);
+  text-transform: uppercase;
+}
+
+.sidebar a {
+  display: block;
+  padding: 6px 0;
+  color: var(--color-text-muted);
+  text-decoration: none;
+}
+
+.content {
+  flex: 1;
+  min-width: 0;
+  padding: 24px;
+}
+
+.page-title {
+  margin-bottom: 20px;
+  color: var(--color-brand);
+  font-size: var(--font-size-xl);
+}
+
+/* ---------- cards ---------- */
+.cards {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 2%;
+}
+
+.card {
+  box-sizing: border-box;
+  padding: 16px;
+  background: var(--color-surface);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-card);
+  transition: transform 0.2s ease;
+}
+
+.card:hover {
+  transform: translateY(-2px);
+}
+
+.card-title {
+  color: var(--color-text-strong);
+  font-size: var(--font-size-sm);
+}
+
+.card-value {
+  margin: 8px 0;
+  color: var(--color-text);
+  font-size: var(--font-size-2xl);
+  font-weight: bold;
+}
+
+.card-delta { font-size: var(--font-size-sm); }
+.card-delta.up { color: var(--color-success); }
+.card-delta.down { color: var(--color-danger); }
+
+/* ---------- panel ---------- */
+.panel {
+  margin-top: 24px;
+  padding: 20px;
+  background: var(--color-surface);
+  border-radius: var(--radius-md);
+}
+
+.panel h2 {
+  margin-bottom: 8px;
+  color: var(--color-text);
+  font-size: var(--font-size-md);
+}
+
+.panel p {
+  margin-bottom: 16px;
+  color: var(--color-text-muted);
+}
+
+/* ---------- buttons ---------- */
+.btn {
+  height: 36px;
+  padding: 0 16px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  background: var(--color-surface);
+  color: var(--color-text);
+  font-size: var(--font-size-base);
+  cursor: pointer;
+  transition: background-color 0.2s, border-color 0.2s;
+}
+
+.btn-primary {
+  border-color: var(--color-primary);
+  background: var(--color-primary);
+  color: var(--color-surface);
+  animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+  0%,
+  100% { transform: scale(1); }
+  50% { transform: scale(1.04); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}

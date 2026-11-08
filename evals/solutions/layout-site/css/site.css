@@ -1,0 +1,41 @@
+* { box-sizing: border-box; }
+body { margin: 0; font-family: system-ui, -apple-system, "Segoe UI", sans-serif; color: #1f2430; background: #fff; }
+p { line-height: 1.5; }
+img { max-width: 100%; height: auto; }
+
+.topbar { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px; padding: 8px 20px; border-bottom: 1px solid #e6e8ee; }
+.logo { display: inline-flex; align-items: center; min-height: 44px; font-weight: 800; font-size: 1.25rem; color: #3b2bd9; text-decoration: none; }
+.nav { display: flex; flex-wrap: wrap; gap: 4px; }
+.nav a { display: inline-flex; align-items: center; min-height: 44px; padding: 0 12px; font-size: 1rem; color: #4a5060; text-decoration: none; }
+
+.hero { padding: 48px 20px; text-align: center; }
+.hero h1 { font-size: clamp(2rem, 6vw, 3.25rem); line-height: 1.15; margin: 0 0 16px; overflow-wrap: break-word; }
+.intro { max-width: 65ch; font-size: 1.125rem; margin: 0 auto 24px; }
+.cta { display: inline-block; padding: 14px 24px; background: #3b2bd9; color: #fff; border-radius: 8px; text-decoration: none; font-weight: 600; }
+
+.screenshot { padding: 0 20px 48px; text-align: center; }
+.screenshot img { width: 1100px; }
+
+.features { display: flex; flex-wrap: wrap; gap: 24px; justify-content: center; padding: 24px 20px; }
+.feature { max-width: 340px; }
+.feature-img { width: 320px; aspect-ratio: 16 / 9; height: auto; object-fit: cover; border-radius: 12px; }
+
+.pricing { padding: 48px 20px; text-align: center; }
+.pricing-table { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 20px; max-width: 960px; margin: 0 auto; }
+.plan { padding: 24px; border: 1px solid #e6e8ee; border-radius: 12px; text-align: left; }
+.plan-featured { border-color: #3b2bd9; box-shadow: 0 8px 24px rgba(59, 43, 217, 0.15); }
+.plan-name { margin: 0; font-size: 1.25rem; }
+.plan-price { font-size: 2.25rem; font-weight: 800; margin-top: 4px; margin-bottom: 8px; }
+.plan-desc { color: #5a6072; }
+.plan-cta { display: inline-flex; align-items: center; min-height: 44px; margin-top: 12px; padding: 0 16px; border: 1px solid #3b2bd9; border-radius: 6px; color: #3b2bd9; text-decoration: none; }
+
+.testimonials { padding: 48px 20px; background: #f6f5ff; }
+.testimonial { max-width: 720px; margin: 0 auto; font-size: 1.125rem; }
+.testimonial cite { display: block; margin-top: 12px; color: #5a6072; }
+
+.footer { padding: 24px 20px 120px; font-size: 0.875rem; color: #5f6577; text-align: center; }
+.footer a { display: inline-block; padding: 12px 4px; color: #5f6577; }
+
+.cookie-banner { position: fixed; left: 12px; right: 12px; bottom: 12px; display: flex; flex-wrap: wrap; align-items: center; gap: 8px 16px; max-width: 720px; margin: 0 auto; padding: 12px 16px; border-radius: 10px; background: #1f2430; color: #fff; font-size: 0.875rem; }
+.cookie-banner p { flex: 1 1 280px; margin: 0; line-height: 1.4; }
+.cookie-accept { min-height: 44px; padding: 0 20px; border: 0; border-radius: 6px; background: #fff; color: #1f2430; font-weight: 600; }

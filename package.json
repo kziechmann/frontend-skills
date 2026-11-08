@@ -1,0 +1,35 @@
+{
+  "name": "frontend-skills",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Claude Code skills and evals for front-end audits: performance, accessibility, CSS quality, and visual layout/usability.",
+  "type": "module",
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "audit:perf": "node skills/perf-audit/scripts/lighthouse-audit.mjs",
+    "audit:a11y": "node skills/a11y-audit/scripts/a11y-audit.mjs",
+    "audit:css": "node skills/css-audit/scripts/css-audit.mjs",
+    "audit:layout": "node skills/layout-audit/scripts/layout-audit.mjs",
+    "test": "node --test test/",
+    "validate": "claude plugin validate .",
+    "eval": "mkdir -p \"$HOME/.cache/claude-eval-tmp\" && TMPDIR=\"$HOME/.cache/claude-eval-tmp\" claude plugin eval . --scaffold --allow-tools Bash Write Edit --trust-plugin",
+    "eval:quick": "mkdir -p \"$HOME/.cache/claude-eval-tmp\" && TMPDIR=\"$HOME/.cache/claude-eval-tmp\" claude plugin eval . --scaffold --allow-tools Bash Write Edit --trust-plugin --runs 1 --ablation none"
+  },
+  "license": "MIT",
+  "dependencies": {
+    "@axe-core/playwright": "^4.14.0",
+    "@projectwallace/css-analyzer": "^9.9.6",
+    "chrome-launcher": "^1.2.3",
+    "lighthouse": "^13.6.0",
+    "playwright": "^1.65.0",
+    "postcss": "^8.5.32",
+    "postcss-scss": "^4.0.9",
+    "stylelint": "^18.0.0",
+    "stylelint-config-standard": "^41.0.0"
+  },
+  "devDependencies": {
+    "yaml": "^2.9.1"
+  }
+}

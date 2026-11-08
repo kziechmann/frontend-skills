@@ -1,0 +1,94 @@
+schema_version: "1.1"
+name: layout-fix
+description: >
+  Pricing page with seeded responsive/usability bugs: fixed-width pricing table and screenshot
+  image (horizontal scroll on phones), nowrap hero heading, stretched feature images, tiny nav
+  links and footer text, a clipped testimonial, a negative margin overlapping plan names, tight
+  line-height, an over-long measure and an oversized cookie banner. The agent should find and fix
+  them across viewports and keep the desktop design intact.
+tags: [layout, fix]
+context:
+  scaffold_script: scaffold.sh
+execution:
+  prompt: |
+    Customers say our pricing page looks broken on their phones. It's a static site in this folder (index.html, css/site.css).
+    Find the layout and usability problems across phone, tablet and desktop sizes, fix them in the CSS/HTML, and make sure the desktop design still looks right.
+    Write a report to audit-reports/layout/REPORT.md covering what was wrong, what you fixed and any further UX recommendations.
+  max_turns: 80
+  timeout_seconds: 1800
+  allowed_tools: [Bash, Read, Write, Edit, Glob, Grep, Skill]
+graders:
+  - type: regex
+    name: pricing-table-fluid
+    target: { source: file, path: css/site.css }
+    pattern: '\.pricing-table\s*\{[^}]*(?<![\w-])width:\s*960px'
+    match: not_contains
+  - type: regex
+    name: heading-can-wrap
+    target: { source: file, path: css/site.css }
+    pattern: 'white-space:\s*nowrap'
+    match: not_contains
+  - type: regex
+    name: media-constrained
+    target: { source: file, path: css/site.css }
+    pattern: 'max-width:\s*100%'
+  - type: regex
+    name: feature-images-not-distorted
+    target: { source: file, path: css/site.css }
+    pattern: 'object-fit:\s*(?:cover|contain)|\.feature-img\s*\{[^}]*height:\s*auto'
+  - type: regex
+    name: no-text-below-12px
+    target: { source: file, path: css/site.css }
+    pattern: 'font-size:\s*(?:\d|1[01])(?:\.\d+)?px'
+    match: not_contains
+  - type: regex
+    name: testimonial-not-clipped
+    target: { source: file, path: css/site.css }
+    pattern: '\.testimonial\s*\{[^}]*(?<![\w-])height:\s*110px'
+    match: not_contains
+  - type: regex
+    name: plan-overlap-fixed
+    target: { source: file, path: css/site.css }
+    pattern: 'margin-top:\s*-28px'
+    match: not_contains
+  - type: regex
+    name: readable-line-height
+    target: { source: file, path: css/site.css }
+    pattern: '(?:^|\})\s*p\s*\{[^}]*line-height:\s*1(?:\.[01]\d*)?\s*[;}]'
+    match: not_contains
+  - type: regex
+    name: preserve-content
+    target: { source: file, path: index.html }
+    pattern: 'Analytics your whole team[\s\S]*Starter[\s\S]*Team[\s\S]*Enterprise[\s\S]*Priya N\.'
+  - type: file_exists
+    name: report-written
+    path: audit-reports/layout/REPORT.md
+  - type: llm
+    name: looked-at-rendering
+    focus: trace
+    criteria: |
+      PASS if the agent rendered the page at both a phone-sized and a desktop-sized viewport (for example screenshots or browser measurements) and examined the result, both before fixing and again after its changes.
+      FAIL if it only read the CSS, or never checked the result after editing.
+  - type: llm
+    name: report-quality
+    focus: { source: file, path: audit-reports/layout/REPORT.md }
+    criteria: |
+      PASS only if the report: names problems with the viewport(s) where they occur (e.g. horizontal scrolling on phones from the fixed-width pricing table or screenshot image, tiny nav tap targets, clipped testimonial, overlapping plan price, stretched feature images, cookie banner covering the screen);
+      describes the fixes; and includes at least two further UX or visual-design observations or recommendations (hierarchy, spacing, readability, CTA prominence, etc.).
+  - type: tool_used
+    name: used-layout-script
+    tool: Bash
+    input_match: 'layout-audit\.mjs'
+    min: 2
+    arm: with-only
+  - type: tool_used
+    name: viewed-screenshots
+    tool: Read
+    input_match: '\.png'
+    arm: with-only
+  - type: regex
+    name: after-run-no-overflow
+    target: { source: file, path: audit-reports/layout/after/summary.json }
+    pattern: '"horizontalOverflow": true'
+    match: not_contains
+    arm: with-only

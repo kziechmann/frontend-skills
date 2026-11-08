@@ -1,0 +1,17 @@
+schema_version: "1.1"
+name: trigger-css
+description: Skill selection — a natural request that should load the css-audit skill without naming it.
+tags: [trigger, css]
+context:
+  scaffold_script: scaffold.sh
+execution:
+  prompt: |
+    Our stylesheet (css/styles.css) has turned into a pile of overrides, IDs and !important. Which problems would you clean up first?
+  max_turns: 6
+  timeout_seconds: 400
+  allowed_tools: [Bash, Read, Glob, Grep, Skill]
+graders:
+  - type: tool_used
+    name: loads-css-audit
+    tool: Skill
+    input_match: 'css-audit'

@@ -1,0 +1,109 @@
+schema_version: "1.1"
+name: a11y-fix
+description: >
+  Community-garden page with seeded WCAG failures: no lang, zoom disabled, images without alt,
+  placeholder-only form fields (which axe accepts), a div "button", an icon-only close button,
+  icon-only social links, low-contrast text, removed focus outlines, positive tabindex and a
+  skipped heading level. The agent should audit, fix with semantic HTML, verify and report.
+tags: [a11y, fix]
+context:
+  scaffold_script: scaffold.sh
+execution:
+  prompt: |
+    This folder is the Riverside Community Garden website (static HTML/CSS/JS; index.html is the page).
+    A neighbour who uses a screen reader and a keyboard told us they can't sign up for the newsletter.
+    Audit the page for accessibility problems, fix them in the code, and verify your fixes. Keep the visual design roughly the same.
+    Write a report to audit-reports/a11y/REPORT.md listing what you fixed (with WCAG references) and what still needs manual testing.
+  max_turns: 70
+  timeout_seconds: 1500
+  allowed_tools: [Bash, Read, Write, Edit, Glob, Grep, Skill]
+graders:
+  - type: regex
+    name: html-lang
+    target: { source: file, path: index.html }
+    pattern: '<html[^>]*\blang=["\x27]?[a-zA-Z]{2}'
+  - type: regex
+    name: zoom-not-disabled
+    target: { source: file, path: index.html }
+    pattern: 'user-scalable\s*=\s*(?:no|0)|maximum-scale\s*=\s*1(?:\.0+)?\s*[,"\x27]'
+    match: not_contains
+  - type: regex
+    name: images-have-alt
+    target: { source: file, path: index.html }
+    pattern: '<img(?![^>]*\balt=)[^>]*>'
+    match: not_contains
+  - type: regex
+    name: email-field-labelled
+    target: { source: file, path: index.html }
+    flags: s
+    pattern: '<label[^>]*\bfor=["\x27]email["\x27]|<label\b(?:(?!</label>).)*<input(?=[^>]*type=["\x27]email)'
+  - type: regex
+    name: name-field-labelled
+    target: { source: file, path: index.html }
+    flags: s
+    pattern: '<label[^>]*\bfor=["\x27]name["\x27]|<label\b(?:(?!</label>).)*<input(?=[^>]*\bid=["\x27]name["\x27])'
+  - type: regex
+    name: subscribe-is-native-button
+    target: { source: file, path: index.html }
+    flags: i
+    pattern: '<button\b[^>]*>\s*Subscribe'
+  - type: regex
+    name: no-mouse-only-div-handlers
+    target: { source: file, path: index.html }
+    pattern: '<(?:div|span)\b[^>]*\sonclick='
+    match: not_contains
+  - type: regex
+    name: icon-button-named
+    target: { source: file, path: index.html }
+    pattern: '<button(?![^>]*aria-label)[^>]*>\s*<i\b[^>]*>\s*</i>\s*</button>'
+    match: not_contains
+  - type: regex
+    name: social-links-named
+    target: { source: file, path: index.html }
+    pattern: '<a\b(?![^>]*aria-label)[^>]*\bclass=["\x27][^"\x27]*\bsocial\b[^>]*>\s*<svg[\s\S]*?</svg>\s*</a>'
+    match: not_contains
+  - type: regex
+    name: no-positive-tabindex
+    target: { source: file, path: index.html }
+    pattern: 'tabindex=["\x27]?[1-9]'
+    match: not_contains
+  - type: regex
+    name: heading-levels-not-skipped
+    target: { source: file, path: index.html }
+    pattern: '<h1[\s\S]*?</h1>(?:(?!<h2\b)[\s\S])*<h[3-6]\b'
+    match: not_contains
+  - type: regex
+    name: focus-indicator-restored
+    target: { source: file, path: css/styles.css }
+    pattern: ':focus-visible|^(?![\s\S]*outline:\s*(?:none|0)\b)'
+  - type: regex
+    name: hint-contrast-fixed
+    target: { source: file, path: css/styles.css }
+    pattern: '\.hint\s*\{[^}]*color:\s*#aaa(?:aaa)?\b'
+    match: not_contains
+  - type: regex
+    name: preserve-content
+    target: { source: file, path: index.html }
+    pattern: 'Grow with your neighbours[\s\S]*Seed swap[\s\S]*Get the monthly newsletter'
+  - type: file_exists
+    name: report-written
+    path: audit-reports/a11y/REPORT.md
+  - type: llm
+    name: semantic-fixes-not-bandaids
+    focus: files
+    criteria: |
+      Judge the code changes. PASS only if fixes use native HTML semantics where possible (a real <button> for Subscribe, <label> elements for form fields, landmarks such as <main>/<nav>/<header>/<footer>, real headings) and contrast fixes keep the colour's hue.
+      FAIL if issues were hidden instead of fixed: aria-hidden="true" on meaningful content, role="presentation" on meaningful elements, tabindex="-1" added to dodge focus problems, removed form fields or content, or outline removal left without a visible :focus-visible replacement.
+  - type: llm
+    name: report-quality
+    focus: { source: file, path: audit-reports/a11y/REPORT.md }
+    criteria: |
+      PASS only if the report: lists the fixes with WCAG success criteria (e.g. 1.1.1, 1.3.1, 1.4.3, 2.1.1, 2.4.7, 3.1.1, 4.1.2);
+      includes verification results after the fixes (e.g. re-run automated checks with violation counts before/after);
+      and has a section on manual testing still needed (at least screen reader testing), without claiming the page is fully "compliant" based on automated checks alone.
+  - type: tool_used
+    name: used-a11y-script
+    tool: Bash
+    input_match: 'a11y-audit\.mjs'
+    min: 2
+    arm: with-only

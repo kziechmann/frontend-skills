@@ -1,0 +1,4 @@
+node_modules/
+audit-reports/
+evals/results/
+*.log

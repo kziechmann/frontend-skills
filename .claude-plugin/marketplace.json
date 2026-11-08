@@ -1,0 +1,16 @@
+{
+  "name": "frontend-skills",
+  "owner": {
+    "name": "kziechmann"
+  },
+  "metadata": {
+    "description": "Front-end audit skills for Claude Code: performance, accessibility, CSS quality and layout/usability, with an eval suite."
+  },
+  "plugins": [
+    {
+      "name": "frontend-skills",
+      "source": "./",
+      "description": "Front-end audit skills (performance, accessibility, CSS, layout/usability) with evals."
+    }
+  ]
+}
