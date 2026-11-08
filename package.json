@@ -12,7 +12,7 @@
     "audit:a11y": "node skills/a11y-audit/scripts/a11y-audit.mjs",
     "audit:css": "node skills/css-audit/scripts/css-audit.mjs",
     "audit:layout": "node skills/layout-audit/scripts/layout-audit.mjs",
-    "test": "node --test test/",
+    "test": "node --test test/*.test.mjs",
     "validate": "claude plugin validate .",
     "eval": "mkdir -p \"$HOME/.cache/claude-eval-tmp\" && TMPDIR=\"$HOME/.cache/claude-eval-tmp\" claude plugin eval . --scaffold --allow-tools Bash Write Edit --trust-plugin",
     "eval:quick": "mkdir -p \"$HOME/.cache/claude-eval-tmp\" && TMPDIR=\"$HOME/.cache/claude-eval-tmp\" claude plugin eval . --scaffold --allow-tools Bash Write Edit --trust-plugin --runs 1 --ablation none"

@@ -36,8 +36,13 @@ or load it from a checkout: `claude --plugin-dir /path/to/frontend-skills`.
 ```bash
 cd /path/to/frontend-skills
 npm install
-npx playwright install chromium   # skip if Chrome is installed (CHROME_PATH or FRONTEND_AUDIT_CHROME are honored)
+npx playwright install chromium   # installs Chromium + chrome-headless-shell
 ```
+
+The scripts prefer Playwright's `chrome-headless-shell` when it is installed (it also runs inside
+sandboxes that block Unix sockets, such as the `claude plugin eval` sandbox on Linux), then fall back
+to Playwright's Chromium, `CHROME_PATH`, or a system Chrome. Override with `FRONTEND_AUDIT_CHROME`
+or `--chrome <path>`.
 
 If dependencies are missing, the scripts print the exact `npm install --prefix …` command and the
 skills tell Claude to run it.
